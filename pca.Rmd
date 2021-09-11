@@ -1,0 +1,544 @@
+---
+title: "feature selection"
+author: "kelvin njunge"
+date: "9/9/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **PROBLEM DEFINITION**
+## **a) Specifying the Question**
+
+reducing your dataset to a low dimensional dataset using the PCA
+
+## **b) Defining the metrics for success**
+
+This section of the project entails reducing your dataset to a low dimensional dataset using the PCA. You will be required to perform your analysis and provide insights gained from your analysis.
+
+## **c) Understanding the context**
+
+You are a Data analyst at Carrefour Kenya and are currently undertaking a project that will inform the marketing department on the most relevant marketing strategies that will result in the highest no. of sales (total price including tax). Your project has been divided into four parts where you'll explore a recent marketing dataset by performing various unsupervised learning techniques and later providing recommendations based on your insights.
+
+## **d) Recording the Experimental Design**
+
+1.   Define the question, the metric for success, the context, experimental design taken.
+2. Read and explore the given dataset.
+3. reducing your dataset to a low dimensional dataset using the PCA
+ 
+## **e) Relevance of the data**
+
+The data used for this project will inform the marketing department on the most relevant marketing strategies that will result in the highest no. of sales (total price including tax)
+
+
+## **Loading data**
+```{r}
+getwd()
+```
+
+```{r}
+sales <- read.csv("C:\\Users\\Ricky\\Documents\\Supermarket_Dataset_1 - Sales Data.csv")
+
+head(sales)
+```
+
+```{r}
+# checkiing for size of the dataset
+dim(sales)
+```
+
+```{r}
+# Summary
+summary(sales)
+```
+
+## **Tidying the data**
+```{r}
+# Checking for unique values are in variable
+rapply(sales,function(x)length(unique(x)))
+```
+
+```{r}
+# checking for duplicates
+#df[duplicated(df), ]
+```
+
+```{r}
+# checking for missing values
+#colSums(is.na(df))
+```
+
+```{r}
+#Dropping columns
+sales <- subset(sales, select = -c(Invoice.ID,gross.margin.percentage))
+```
+
+
+
+```{r}
+head(sales)
+```
+
+## Exploratory Data analysis
+
+### Univariate Analysis
+
+```{r}
+# creating a mode function
+mode <- function(x){
+  uniqx <- unique(x)
+  uniqx[which.max(tabulate(match(x, uniqx)))]}
+```
+
+#### Branch
+
+```{r}
+library(ggplot2)
+ggplot(sales,aes(Branch)) + geom_bar(stat='count') + labs(title='Branches Distribution') + theme_classic()
+```
+Branch distribution is roughly equal
+
+#### Gender
+
+```{r}
+# Visualization
+ggplot(sales, aes(Gender)) +
+  geom_bar(stat="count")
+```
+The gender distribution in the dataset is balanced.
+
+#### Customer type
+
+```{r}
+# visualization
+ggplot(sales, aes(Product.line)) +
+  geom_bar()
+```
+Fashion Accessories and, Food and Beverage tie for the most bought categories but the distribution does
+ not suggest an imbalance in general.
+
+
+#### Unit Price
+```{r}
+uprice.mean <- mean(sales$Unit.price)
+uprice.mean
+```
+
+```{r}
+# Mode
+uprice.mode <- mode(sales$Unit.price)
+uprice.mode
+# Median
+uprice.median <- median(sales$Unit.price)
+uprice.median
+# Standard Deviation
+uprice.sd <- sd(sales$Unit.price)
+uprice.sd
+# Range
+uprice.range <- range(sales$Unit.price)
+uprice.range
+# Visualization
+ggplot(sales, aes(Unit.price)) +
+  geom_boxplot(outlier.colour = "red")
+```
+
+#### Quantity
+```{r}
+# mean
+quantity.mean <- mean(sales$Quantity)
+quantity.mean
+# Mode
+quantity.mode <- mode(sales$Quantity)
+quantity.mode
+# Median
+quantity.median <- median(sales$Quantity)
+quantity.median
+# Standard Deviation
+quantity.sd <- sd(sales$Quantity)
+quantity.sd
+# Range
+quantity.range <- range(sales$Quantity)
+quantity.range
+# Quantiles
+quantity.quants <- quantile(sales$Quantity)
+quantity.quants
+# Visualization
+ggplot(sales, aes(Quantity)) +
+  geom_boxplot(outlier.colour = "red")
+```
+
+#### Tax
+
+```{r}
+# mean
+tax.mean <- mean(sales$Tax)
+tax.mean
+# mode
+tax.mode <- mode(sales$Tax)
+tax.mode
+# Median
+tax.median <- median(sales$Tax)
+tax.median
+# Standard Deviation
+tax.sd <- sd(sales$Tax)
+tax.sd
+# Range
+tax.range <- range(sales$Tax)
+tax.range
+# Quantiles
+tax.quantiles <- quantile(sales$Tax)
+tax.quantiles
+# Visual
+ggplot(sales, aes(Tax)) +
+  geom_boxplot(outlier.colour = "red")
+```
+
+#### Payment
+
+```{r}
+# Mode
+payment.mode <- mode(sales$Payment)
+payment.mode
+
+# visual
+ggplot(sales, aes(Payment)) +
+  geom_bar(stat="count")
+
+```
+
+There is a fair distribution in the payment variable. However, fewer people tend to pay by Credit Card in these stores
+
+#### COGS
+
+```{r}
+# mean
+cogs.mean <- mean(sales$cogs)
+cogs.mean
+# mode
+cogs.mode <- mode(sales$cogs)
+cogs.mode
+# median
+cogs.median <- median(sales$cogs)
+cogs.median
+# standard deviation
+cogs.sd <- sd(sales$cogs)
+cogs.sd
+# range
+cogs.range <- range(sales$cogs)
+cogs.range
+# quantiles
+cogs.quantiles <- quantile(sales$cogs)
+cogs.quantiles
+# visual
+ggplot(sales, aes(cogs)) +
+  geom_boxplot(outlier.colour = "red")
+```
+
+#### Gross Income
+```{r}
+gross.income <- sales$gross.income
+# mean
+gross.income.mean <- mean(gross.income)
+gross.income.mean
+# mode
+gross.income.mode <- mode(gross.income)
+gross.income.mode
+# median
+gross.income.median <- median(gross.income)
+gross.income.median
+# range 
+gross.income.range <- range(gross.income)
+gross.income.range
+# standard deviation
+gross.income.sd <- sd(gross.income)
+gross.income.sd
+# visual
+ ggplot(sales, aes(gross.income)) +
+   geom_boxplot(outlier.colour = "red")
+```
+
+#### Ratings
+```{r}
+# mean
+rate.mean <- mean(sales$Rating)
+rate.mean
+# mode
+rate.mode <- mode(sales$Rating)
+rate.mode
+# median
+rate.median <- median(sales$Rating)
+rate.median
+# standard deviation
+rate.sd <- sd(sales$Rating)
+rate.sd
+# range
+rate.range <- range(sales$Rating)
+rate.range
+# quantiles
+rate.quantiles <- quantile(sales$Rating)
+rate.quantiles
+
+# visual
+ggplot(sales, aes(Rating)) +
+  geom_boxplot(outlier.colour = "red")
+```
+
+#### Total
+
+```{r}
+# mean
+total.mean <- mean(sales$Total)
+total.mean
+# median
+total.median <- median(sales$Total)
+total.median
+# mode
+total.mode <- mode(sales$Total)
+total.mode
+# standard deviation
+total.sd <- sd(sales$Total)
+total.sd
+# range
+total.range <- range(sales$Total)
+total.range
+# quantiles
+total.quantiles <- quantile(sales$Total)
+total.quantiles
+# visual
+ggplot(sales, aes(Total)) +
+  geom_boxplot(outlier.colour = "red" )
+```
+
+
+```{r}
+library(tidyr)
+library(magrittr)
+library(dplyr)
+library(psych)
+```
+
+### Bivariate Analysis
+
+```{r}
+ggplot(sales, aes(x=Product.line, y=Total)) +
+  geom_point()
+```
+Fashion Accessories have the highest Total prices while health and beauty products have a relatively lower price.
+
+```{r}
+ggplot(sales ,aes(Gender, Total)) +
+  geom_point()
+```
+Total Price is equally distributed in terms of gender
+
+```{r}
+ggplot(sales, aes(Payment, Total)) +
+  geom_point()
+```
+The payment methods are nearly identical for the total prices of items at checkouts with some more expensive ones being attributed with Credit card payments.
+
+```{r}
+ggplot(sales, aes(gross.income, Total)) +
+  geom_point()
+```
+As expected, there is a perfect positive linear relationship with how much the total is at checkout with the consumers gross income. 
+
+```{r}
+ggplot(sales, aes(Customer.type , Total)) +
+  geom_point()
+```
+Members and non members have a nearly equal distribution in expenditure with Members having no visible breaks in prices.
+
+```{r}
+ggplot(sales, aes(Tax, Total)) +
+  geom_point()
+```
+There is a direct linear relationship between tax and total price. As expected, the higher the tax on items, the more they cost.
+
+```{r}
+ggplot(sales, aes(Unit.price, Total)) +
+  geom_point()
+```
+There are several positive linear relationships with the Unit Price variable: the higher it is the higher the total price is. More data would be needed to explain the different lines considering they represent outside factors that influence the relationship. A good example would be the type of products being of different types.
+
+```{r}
+#Salary distribution by rank
+ggplot(sales,
+aes(x = Total,
+fill = Customer.type)) +
+geom_density(alpha = 0.4) +
+labs(title = "Salary distribution by rank")
+```
+Normal customers seem to have a greater influence on total than members.
+
+```{r}
+#Distribution of Total income per Branch
+ggplot(sales,
+aes(x = Total,
+fill = Branch)) +
+geom_density(alpha = 0.4) +
+labs(title = "Distribution of Total income per Branch")
+```
+Branch A contributes more to total and Branch C contributes the leastBranch A contributes more to total and Branch C contributes the least
+
+```{r}
+#Distribution of Total per Payment method
+ggplot(sales,
+aes(x = Total,
+fill = Payment)) +
+geom_density(alpha = 0.4) +
+labs(title = "Distribution of Total income per Payment method")
+```
+
+```{r}
+#What quantity was mostly purchased in the store
+ggplot(sales, aes(x = Quantity)) +
+geom_bar()
+```
+Most people purchased 10items, followed by those who purchased 1 item
+
+```{r}
+library(corrplot)
+```
+
+```{r}
+#Get the correlation matrix
+nums <- subset(sales, select = -c(Branch, Customer.type,Gender,Product.line,Date, Time, Payment))
+res = cor(nums)
+#Plotting a correlation plot
+corrplot(res, method="color",addCoef.col = "black",
+tl.col="black", tl.srt=45)
+```
+There is perfect correlation
+between Tax, Cogs and gross income. There is also high correlation between Unit Price and Tax,cogs and gross.income and Total.
+
+## **Dimensionality Reduction**
+### **PCA**
+### **Feature Engineering**
+* All variables to be used for dimensionality reduction should be numerical variables, hence we will convert our factor categories to numerics.We will also drop the date and time columns.
+
+```{r}
+#First we will make a copy of our sales dataset for future use
+data <- sales
+#Dropping columns for date and time
+data <- subset(data, select = -c(Date, Time))
+head(data)
+```
+
+```{r}
+data$Branch <- as.factor(data$Branch)
+data$Customer.type <- as.factor(data$Customer.type)
+data$Gender <- as.factor(data$Gender)
+data$Product.line <- as.factor(data$Product.line)
+data$Payment <- as.factor(data$Payment)
+```
+
+```{r}
+#Converting factor columns to numeric
+data$Branch <- as.integer(data$Branch)
+data$Customer.type <- as.numeric(data$Customer.type)
+data$Gender <- as.numeric(data$Gender)
+data$Product.line <- as.numeric(data$Product.line)
+data$Payment <- as.numeric(data$Payment)
+data$Quantity <- as.numeric(data$Quantity)
+head(data)
+```
+
+```{r}
+library(factoextra)
+
+```
+
+```{r}
+#Performing pca
+data.pca <- prcomp(data[,c(1:11)],center = TRUE,scale. = TRUE)
+summary(data.pca)
+```
+
+```{r}
+str(data.pca)
+```
+
+```{r}
+#Graph of variables
+fviz_pca_var(data.pca,
+col.var = "contrib", # Color by contributions to the PC
+gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+repel = TRUE # Avoid text overlapping
+)
+
+```
+Gross income, Tax and cogs contribute highly to the first PC whereas Gender, Payment mostly contribute to the second PC
+
+
+```{r}
+# Eigenvalues
+eig.val <- get_eigenvalue(data.pca)
+eig.val
+```
+
+We have obtained 11 principal components. Our first PC, PC1 explains 35.7% Variation, our second, PC2 explains 46%. The first 8 PCs gives us a variability proportion of upto 100%.
+
+## **Feature Selection**
+* Using Filter Method Using the filter method, we will check for correlation between variables. We will then remove variables that are highly correlated as that is a sign of redundancy.
+
+```{r}
+library(caret)
+```
+
+```{r}
+#Separating target variable with independent variables
+df <- data[-12]
+# Calculating the correlation matrix
+correlationMatrix <- cor(df)
+# Find attributes that are highly correlated
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff= 0.75)
+# Highly correlated attributes
+highlyCorrelated
+```
+```{r}
+names(df[,highlyCorrelated])
+```
+Tax and Cogs are highly correlated.
+
+```{r}
+# Removing the highly correlated features
+df.feat<-df[-highlyCorrelated]
+# Performing a graphical comparison
+par(mfrow = c(1, 2))
+corrplot(correlationMatrix, order = "hclust")
+corrplot(cor(df.feat), order = "hclust")
+```
+
+## **Conclusion**
+The following features will be used for analysis: 
+
+- Gender
+
+- Payment
+
+- Customer type
+
+- Rating
+
+- Branch
+
+- Unit price
+
+- Product line
+
+- Quantity 
+
+- Gross Income
+
+
+
+
+
+
+
+

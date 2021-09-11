@@ -1,0 +1,93 @@
+---
+title: "Anomaly  detection"
+author: "kelvin njunge"
+date: "9/10/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#  **Defining the Question**
+
+## a) **Specifying the Question**
+The objective of this project fraud detection by checking whether there are any anomalies in the given sales dataset that could point out potential fraud activity.
+## b) Defining the Metric for Success
+Exhaustively performing anomaly detection without any errors.
+
+## c) **Understanding the context**
+Working as a consultant Data analyst at Carrefour Kenya and are currently undertaking a project that will inform the marketing department on the most relevant marketing strategies that will result in the highest no. of sales (total price including tax).This project endeavors to  explore a recent marketing dataset and check whether there are any anomalies in the given sales dataset that could point out potential fraud activity.
+
+## d) **Recording the experimental design**
+Importing and reading the data
+Data Cleaning
+Anomalies detection
+Conclusions and recommendations
+
+## e) **Data Relevance**
+The data was provided by the company (http://bit.ly/CarreFourSalesDataset). 
+
+```{r}
+library(future)
+library(fracdiff)
+library(lmtest)
+library(tseries)
+library(tidyverse)
+library(anomalize)
+library(tibbletime)
+```
+
+
+```{r}
+getwd()
+```
+
+```{r}
+df <- read.csv("C:\\Users\\Ricky\\Documents\\Supermarket_Sales_Forecasting - Sales.csv")
+```
+
+```{r}
+# preview the dataset
+head(df)
+```
+
+```{r}
+#stucture of the dataset
+str(df)
+```
+
+```{r}
+# reformatting the dates and sortings
+df$Date <- as.Date(df$Date, format = "%m/%d/%Y")
+df$Date <- sort(df$Date,  decreasing = FALSE)
+
+```
+
+
+```{r}
+# casting as a tibble
+data <- as_tbl_time(df, index = Date)
+# getting unique daily entries without multiple entries
+data <- data %>%
+  as_period(period = "daily")
+# dimensions of data
+dim(data)
+```
+
+```{r}
+# getting and plotting data for anomaly detection
+data %>%
+  time_decompose(Sales) %>%
+  anomalize(remainder) %>%
+  time_recompose() %>%
+  plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
+```
+
+## Conclusion
+
+There were no anomalies detected in the data.
+
+
